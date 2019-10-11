@@ -1,4 +1,3 @@
-from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
@@ -27,7 +26,7 @@ sys.path.append("..")
 import learning_module
 import functions
 from config import Config, BiasRL, ActionMode, QMode
-from routingShortestPath import RoutingShortestPath
+from routing_spf import RoutingShortestPath
 
 # routing type
 class RoutingType(Enum):

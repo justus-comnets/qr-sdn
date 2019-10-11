@@ -16,6 +16,10 @@ Scripts can be started with: `sudo python Four_switches_two_ways.py`
 Includes the measurement data and plot scripts.
 Scripts can be started with: `python3 plot_<scenario>.py`
 
+- `/vagrant`:
+Includes Vagrantfile to spawn multiple VMs automatically and scripts to start and download measurements.
+Scripts can be started with: `vagrant up rl_routing`, `vagrant ssh rl_routingX`
+
 
 #### TODO's
 

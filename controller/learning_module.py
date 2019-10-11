@@ -1,4 +1,3 @@
-from enum import Enum
 import time
 import os
 import copy
@@ -6,10 +5,10 @@ import math
 import itertools as it
 import numpy as np
 import json
-# for communication between mininet and ryu
 import random
 import sys
 import csv
+
 sys.path.append("..")
 sys.path.append(".")
 from config import Config
@@ -21,6 +20,8 @@ from datetime import datetime
 
 MAX_LENGHT_DIFFSET = 2
 MAX_PAST_REWARDS = 5
+
+
 # modes:
 
 ###############################################################
@@ -131,14 +132,18 @@ def learningModule(pipe, ):
     next_action = ''
 
     # clean up save files
-    clearing_save_file(logPath, load_level, 'reward_controller', splitUpLoadLevels, iteration_split_up_flag, iterationsLevel)
-    clearing_save_file(logPath, load_level, 'average_latency', splitUpLoadLevels, iteration_split_up_flag, iterationsLevel)
+    clearing_save_file(logPath, load_level, 'reward_controller', splitUpLoadLevels, iteration_split_up_flag,
+                       iterationsLevel)
+    clearing_save_file(logPath, load_level, 'average_latency', splitUpLoadLevels, iteration_split_up_flag,
+                       iterationsLevel)
     time_now = time.time()
     time_finish = time_now + (duration_per_minutes * 60)
     dt_object = datetime.fromtimestamp(time_finish)
-    print("STARTING LEARNING | Mode: {} | time: {}min | exp. finishing: {} | alpha: {} | epsilon: {} | temperature; {} | Exploration Mode: {}".format(learning_mode,
-                                                                                        duration_per_minutes, dt_object, alpha,
-                                                                                        epsilon, temperature, exploration_mode))
+    print(
+        "STARTING LEARNING | Mode: {} | time: {}min | exp. finishing: {} | alpha: {} | epsilon: {} | temperature; {} | Exploration Mode: {}".format(
+            learning_mode,
+            duration_per_minutes, dt_object, alpha,
+            epsilon, temperature, exploration_mode))
     # the load level that arrives from the controller, gathered from the pipe
     # loadLevelController = 0
     while True:
@@ -197,11 +202,11 @@ def learningModule(pipe, ):
                 if reset_iteration_flag:
                     saveQ(Q, iterationsLevel)
                     iterationsLevel = iterationController
-                    #if not reset_load_flag:
+                    # if not reset_load_flag:
                     clearing_save_file(logPath, load_level, 'reward_controller', splitUpLoadLevels,
-                                   iteration_split_up_flag, iterationsLevel)
+                                       iteration_split_up_flag, iterationsLevel)
                     clearing_save_file(logPath, load_level, 'average_latency', splitUpLoadLevels,
-                                   iteration_split_up_flag, iterationsLevel)
+                                       iteration_split_up_flag, iterationsLevel)
                     # resetting the Q-Table (restart of learning process)
                     if reset_q_test:
                         print("xxxxxxxx RESETTING Q LoadLevel: {} Iteration: {} xxxxxxxxxxxxx".format(load_level,
@@ -218,14 +223,15 @@ def learningModule(pipe, ):
                     print("xxxxxxxxxxx Iteration: {} xxxxxxxxxxxxxxxxxxxxxxxxxx".format(iterationsLevel))
                     continue
 
-                #perfectStateStr = '{"10.0.0.12_10.0.0.42": [1, 3, 4], "10.0.0.11_10.0.0.41": [1, 2, 4], "10.0.0.13_10.0.0.43": [1, 3, 4]}'
-                #perfectState = json.loads(perfectStateStr)
+                # perfectStateStr = '{"10.0.0.12_10.0.0.42": [1, 3, 4], "10.0.0.11_10.0.0.41": [1, 2, 4], "10.0.0.13_10.0.0.43": [1, 3, 4]}'
+                # perfectState = json.loads(perfectStateStr)
                 # if the load level is not -1 or 0
                 if load_level > 0:
                     # if it is the first flow
                     if len(temp_flows) < 1:
                         copied_paths_per_flow = copy.deepcopy(paths_per_flow)
-                        Q, actions, state_transitions = update_Q_table(Q, copied_paths_per_flow, mergingQTableFlag, action_mode)
+                        Q, actions, state_transitions = update_Q_table(Q, copied_paths_per_flow, mergingQTableFlag,
+                                                                       action_mode)
                         current_state = current_combination
                         previous_state = {}
                         temp_flows = list(current_combination.keys())
@@ -257,7 +263,7 @@ def learningModule(pipe, ):
                             reward = get_reward_utilization(current_combination, latencydict)
 
                         # check if waited sufficient long time
-                        #if delayedRewardCounter >= delay_reward:
+                        # if delayedRewardCounter >= delay_reward:
                         average_latency_list.append(get_average_latency(current_combination, latencydict))
                         rewards_list.append(reward)
                         reward_saving_list.append(reward)
@@ -270,7 +276,7 @@ def learningModule(pipe, ):
                         if len(rewards_list) >= measurements_for_reward:
                             # calc qValue
                             if len(previous_state) > 0 and len(previous_action) > 0:
-                                if (learning_mode.value ==  QMode.MULTI_ARMED_BANDIT_NO_WEIGHT.value or
+                                if (learning_mode.value == QMode.MULTI_ARMED_BANDIT_NO_WEIGHT.value or
                                         learning_mode.value == QMode.MULTI_ARMED_BANDIT_WITH_WEIGHT.value):
                                     Q = update_Q_bandit(previous_state, current_combination, alpha, copy.deepcopy(Q),
                                                         np.mean(rewards_list), previous_action, learning_mode)
@@ -279,32 +285,36 @@ def learningModule(pipe, ):
                                                     np.mean(rewards_list), previous_action)
                                 if learning_mode.value is QMode.SARSA.value:
                                     Q, next_action = update_Q_SARSA(previous_state, current_state, alpha, gamma,
-                                            copy.deepcopy(Q), np.mean(rewards_list), previous_action,
-                                            exploration_mode, epsilon, temperature, explorationDegree)
+                                                                    copy.deepcopy(Q), np.mean(rewards_list),
+                                                                    previous_action,
+                                                                    exploration_mode, epsilon, temperature,
+                                                                    explorationDegree)
                                 if learning_mode.value is QMode.TD_ZERO.value:
                                     Q = update_TD_ZERO(previous_state, current_state, alpha, gamma,
-                                                                    copy.deepcopy(Q), np.mean(rewards_list),
-                                                                    previous_action)
-                                    #print("NEXT_ACTION: {}".format(next_action))
+                                                       copy.deepcopy(Q), np.mean(rewards_list),
+                                                       previous_action)
+                                    # print("NEXT_ACTION: {}".format(next_action))
                             # if not shortest path -> choose new action
                             if learning_mode.value != QMode.SHORTEST_PATH.value:
                                 if learning_mode.value == QMode.TD_ZERO.value:
-                                    action = get_action_TD_zero(exploration_mode, current_state, Q, epsilon, temperature,
-                                                        explorationDegree, actions, state_transitions)
+                                    action = get_action_TD_zero(exploration_mode, current_state, Q, epsilon,
+                                                                temperature,
+                                                                explorationDegree, actions, state_transitions)
                                 else:
                                     if learning_mode.value == QMode.SARSA.value:
                                         # first time
                                         if len(next_action) > 0:
                                             action = copy.deepcopy(next_action)
                                         else:
-                                            action = get_action(exploration_mode, current_state, Q, epsilon, temperature, explorationDegree)
+                                            action = get_action(exploration_mode, current_state, Q, epsilon,
+                                                                temperature, explorationDegree)
                                     else:
                                         action = get_action(exploration_mode, current_state, Q, epsilon, temperature,
                                                             explorationDegree)
                                 # do the action (if it is a transition) (send it into the pipe):
 
                                 if action_mode.value == ActionMode.ONE_FLOW.value:
-                                    #print("ACTION: {}".format(action))
+                                    # print("ACTION: {}".format(action))
                                     pipe.send(action)
                                 elif action_mode.value == ActionMode.DIRECT_CHANGE.value:
                                     pipe.send(action)
@@ -316,8 +326,11 @@ def learningModule(pipe, ):
                                 else:
                                     current_state = get_next_state(state_transitions, current_state, action)
 
-                                print("Action: {} Next State: {} PrevState: {} PrevReward: {}".format(previous_action, current_state, previous_state,
-                                                                                           np.mean(rewards_list)))
+                                print("Action: {} Next State: {} PrevState: {} PrevReward: {}".format(previous_action,
+                                                                                                      current_state,
+                                                                                                      previous_state,
+                                                                                                      np.mean(
+                                                                                                          rewards_list)))
                             # log output
                             if (generalIterator % 100) < 1:
                                 print("-------number of batch: {} epsilon: {}".format(generalIterator, epsilon))
@@ -350,6 +363,7 @@ def learningModule(pipe, ):
                     print("Exited after {} steps (last load level)".format(generalIterator))
                     break
 
+
 def get_action(exploration_mode, current_state, Q, epsilon, temperature, explorationDegree):
     """
     choose action
@@ -370,7 +384,9 @@ def get_action(exploration_mode, current_state, Q, epsilon, temperature, explora
         action = get_action_ucb(Q, current_state, explorationDegree)
     return action
 
-def get_action_TD_zero(exploration_mode, current_state, Q, epsilon, temperature, explorationDegree, actions, nextStates):
+
+def get_action_TD_zero(exploration_mode, current_state, Q, epsilon, temperature, explorationDegree, actions,
+                       nextStates):
     """
     choose action
     @param exploration_mode:
@@ -390,7 +406,8 @@ def get_action_TD_zero(exploration_mode, current_state, Q, epsilon, temperature,
         action = get_action_ucb(Q, current_state, explorationDegree)
     return action
 
-def get_next_state(stateTransitions, currentState, action, direct = False):
+
+def get_next_state(stateTransitions, currentState, action, direct=False):
     """
     returns next state
     @param stateTransitions: dict that contains the next state based on the tuple between current state and action
@@ -413,6 +430,7 @@ def get_next_state(stateTransitions, currentState, action, direct = False):
                 nextState = stateTrans[2]
     return nextState
 
+
 def get_average_latency(currentPathCombination, latencyDict):
     """
     calculates the average (latency) value of all elements of a list
@@ -427,7 +445,8 @@ def get_average_latency(currentPathCombination, latencyDict):
     avgLat = cost / len(latencyList)
     return avgLat
 
-def get_reward (currentPathCombination, latencyDict):
+
+def get_reward(currentPathCombination, latencyDict):
     """
     calculates the reward as a square root sum quadratic /n of the latency
     @param currentPathCombination:
@@ -438,10 +457,11 @@ def get_reward (currentPathCombination, latencyDict):
     cost = 0
     for element in latencyList:
         cost += element ** 2
-    sqrootLatency = math.sqrt(cost/len(latencyList))
+    sqrootLatency = math.sqrt(cost / len(latencyList))
     return -sqrootLatency
 
-def get_reward_utilization (currentPathCombination, latencyDict, bandwidth_dict = {}, max_bw_dict = {}):
+
+def get_reward_utilization(currentPathCombination, latencyDict, bandwidth_dict={}, max_bw_dict={}):
     """
     TODO:
     calculates the reward as a combination of utilisation and latency
@@ -450,6 +470,7 @@ def get_reward_utilization (currentPathCombination, latencyDict, bandwidth_dict 
     @return:
     """
     return 0
+
 
 def getCostsOfPaths(currentPathCombination, latencyDict):
     """
@@ -463,6 +484,7 @@ def getCostsOfPaths(currentPathCombination, latencyDict):
         cost = get_path_cost(latencyDict, currentPathCombination[path])
         valueList.append(cost)
     return valueList
+
 
 def update_Q_table(prevQ, paths_per_flow, merging_q_table_flag, action_mode, joinedFlowsSet={}):
     """
@@ -493,9 +515,9 @@ def update_Q_table(prevQ, paths_per_flow, merging_q_table_flag, action_mode, joi
         actions = get_actions_for_states(new_states, paths_per_flow_filtered)
         stateTransitions = get_state_transitions(actions)
 
-    #print("Q: {}".format(Q))
+    # print("Q: {}".format(Q))
     print("got actions per states: {}".format(len(actions)))
-    #print("got state transitions: {}".format(time.time() - t0))
+    # print("got state transitions: {}".format(time.time() - t0))
     # matching
     # create Q table
 
@@ -507,7 +529,6 @@ def update_Q_table(prevQ, paths_per_flow, merging_q_table_flag, action_mode, joi
     print("Time to merge: {} micro_sec".format((time.time() - t0) * 10 ** 6))
     print("Action Size: {}".format(len(actions)))
     return Q, actions, stateTransitions
-
 
 
 def merging_qtable(prevQ, newQ, differenceSet):
@@ -545,7 +566,8 @@ def merging_qtable(prevQ, newQ, differenceSet):
                         newQCopy[state][action] = prevQ[dictStateStr][action]
     return newQCopy
 
-def create_new_value_table(states, initValue = -math.inf):
+
+def create_new_value_table(states, initValue=-math.inf):
     """
     creates a new value table
     :param states:
@@ -557,13 +579,14 @@ def create_new_value_table(states, initValue = -math.inf):
     if Config.exploration_mode.value == ExplorationMode.SOFTMAX.value:
         initValue = Config.softmax_init_value
     for state in states:
-        stateStr = json.dumps(state, sort_keys = True)
+        stateStr = json.dumps(state, sort_keys=True)
         Q[stateStr] = [0, initValue]
     print(Q)
     return Q
 
+
 #    creates a new Q table based on the actions of the possible states
-def create_new_q_table(actions, direct = False):
+def create_new_q_table(actions, direct=False):
     """
     creates new q-table based on the states and actions
     @param actions
@@ -597,6 +620,7 @@ def create_new_q_table(actions, direct = False):
             print("Q-array-file not found")
     return Q
 
+
 def get_state_transitions(actions):
     """
     get the next state
@@ -610,10 +634,11 @@ def get_state_transitions(actions):
         nextPath = action[1][1]
         nextState = copy.deepcopy(currentstate)
         if 'NoTrans' not in id:
-        # change the state
+            # change the state
             nextState[id] = nextPath
         stateTransitionPairs.append((currentstate, action[1], nextState))
     return stateTransitionPairs
+
 
 def get_state_transitions_direct(actions):
     """
@@ -627,6 +652,7 @@ def get_state_transitions_direct(actions):
         nextState = action[1][0]
         stateTransitionPairs.append((currentstate, action[1], nextState))
     return stateTransitionPairs
+
 
 # k^n, k.. possibilities, n.. flows
 # 1 flows, 2 directions: 5 possibilities -> 5^2: 16
@@ -690,6 +716,7 @@ def get_actions_for_states(states, paths_per_flows):
         actions.append((state, ('NoTrans', [])))
     return actions
 
+
 def get_actions_for_states_direct(states):
     """
     get the possible actions for a direct change
@@ -715,6 +742,7 @@ def get_actions_for_states_direct(states):
         actions.append((state, ('NoTrans', [])))
     return actions
 
+
 def get_actions_per_current_state(chosenPaths, paths_per_flow):
     """
     gets possible actions for the current state
@@ -737,6 +765,7 @@ def get_actions_per_current_state(chosenPaths, paths_per_flow):
         for possiblePath in otherPaths[id]:
             actions.append((id, chosenPaths[id], possiblePath[0]))
     return actions
+
 
 # Q(s,a) <- Q(S,a) + alpha[R + gamma*max Q(S',a)-Q(S,a)]
 # tracking a non stationary problem
@@ -777,13 +806,14 @@ def update_Q_bandit(currentState, nextState, alpha, Q, reward, action, learning_
         # non weighted average; Q_n+1 = Q_n + 1/n * (R_n - Q_n)
         elif learning_mode.value == QMode.MULTI_ARMED_BANDIT_NO_WEIGHT.value:
             Q[stateNowStr][actionStr][1] = Q[stateNowStr][actionStr][1] + (1 / (Q[stateNowStr][actionStr][0])) * (
-                        reward - Q[stateNowStr][actionStr][1])
+                    reward - Q[stateNowStr][actionStr][1])
         # total visits
         Q[stateNowStr][actionStr][0] = Q[stateNowStr][actionStr][0] + 1
     except KeyError:
         print("Q: {}".format(Q))
         print("StateNowStr: {}".format(stateNowStr))
     return Q
+
 
 # calculate new Q-Value via Q-learning
 def update_Q_QL(currentState, nextState, alpha, gamma, Q, reward, action):
@@ -820,6 +850,7 @@ def update_Q_QL(currentState, nextState, alpha, gamma, Q, reward, action):
         print("StateNowStr: {}".format(stateNowStr))
     return Q
 
+
 def update_TD_ZERO(current_state, nextState, alpha, gamma, Q, reward, action):
     print("UPDATING Q")
     stateNowStr = json.dumps(current_state, sort_keys=True)
@@ -842,10 +873,11 @@ def update_TD_ZERO(current_state, nextState, alpha, gamma, Q, reward, action):
     except KeyError:
         print("Q: {}".format(Q))
         print("StateNowStr_TD_ZERO: {}".format(stateNowStr))
-    #print(Q)
+    # print(Q)
     return Q
 
-def update_Q_SARSA(current_state, nextState, alpha, gamma, Q, reward, action, exploration_mode,epsilon,
+
+def update_Q_SARSA(current_state, nextState, alpha, gamma, Q, reward, action, exploration_mode, epsilon,
                    temperature, explorationDegree):
     """
     updates Q table based on Q-Learning
@@ -869,8 +901,9 @@ def update_Q_SARSA(current_state, nextState, alpha, gamma, Q, reward, action, ex
     nextStateStr = json.dumps(nextState, sort_keys=True)
     actionStr = json.dumps(action, sort_keys=True)
     # get next action
-    actionFollowingStateKey = json.dumps(get_action(exploration_mode, nextState, Q, epsilon, temperature, explorationDegree),
-                                         sort_keys=True)
+    actionFollowingStateKey = json.dumps(
+        get_action(exploration_mode, nextState, Q, epsilon, temperature, explorationDegree),
+        sort_keys=True)
     try:
         # if chosen Q-value is set infinity -> necessary to change
         if math.isinf(Q[stateNowStr][actionStr][1]):
@@ -888,6 +921,7 @@ def update_Q_SARSA(current_state, nextState, alpha, gamma, Q, reward, action, ex
         print("Q: {}".format(Q))
         print("StateNowStr: {}".format(stateNowStr))
     return Q, json.loads(actionFollowingStateKey)
+
 
 ### fucntions for calculating.. maybe outsource to "functions"
 def get_paths(latencyDict, src, dst):
@@ -940,7 +974,7 @@ def get_path_cost(latencyDict, path):
     return cost
 
 
-def keywithmaxActionval(actions, element = 2):
+def keywithmaxActionval(actions, element=2):
     """
         a) create a list of the dict's keys and values;
         b) return the key with the max value
@@ -955,17 +989,20 @@ def keywithmaxActionval(actions, element = 2):
 
 def firstElement(e):
     return e[0]
+
+
 def scndElement(e):
     return e[1]
 
+
 def calc_epsilon(steps, mode):
     return 0.507928 - 0.08 * math.log(steps)
-    #return  0.507928 - 0.05993925*math.log(steps)
-    #return 0.15
+    # return  0.507928 - 0.05993925*math.log(steps)
+    # return 0.15
+
 
 # TODO: implement logic
-def get_action_eps_greedy(current_state, Q, e_greedy, direct = False, actions = {}, state_transitions = {}):
-
+def get_action_eps_greedy(current_state, Q, e_greedy, direct=False, actions={}, state_transitions={}):
     """
     chossing action based on eps_greedy
     @param current_state:
@@ -995,12 +1032,10 @@ def get_action_eps_greedy(current_state, Q, e_greedy, direct = False, actions = 
         possible_actions = actions[current_state]
         nextStateDict = {}
         for action in possible_actions:
-
             nextState = get_next_state(state_transitions, current_state, action, True)
 
 
 def get_action_softmax(Q, currentState, tau, actions={}, state_transitions={}):
-
     """
     get the action based on the softmax exploration strategy
     @param Q:
@@ -1020,10 +1055,10 @@ def get_action_softmax(Q, currentState, tau, actions={}, state_transitions={}):
         chosenKey = np.random.choice(actionsKeys, p=probs)
         return json.loads(chosenKey)
     else:
-        #print(actions)
+        # print(actions)
         possible_actions = []
         for action in actions:
-            #print("ACTION_PARSE: {}, current: {}".format(action,currentState))
+            # print("ACTION_PARSE: {}, current: {}".format(action,currentState))
             if action[0] == currentState:
                 possible_actions.append(copy.deepcopy(action))
 
@@ -1036,7 +1071,7 @@ def get_action_softmax(Q, currentState, tau, actions={}, state_transitions={}):
             actionsValue[json.dumps(action[1], sort_keys=True)] = value
         try:
             print("ActionsValue: {}".format(actionsValue))
-            total = sum( [np.exp(-1 / (actionsValue[action] * tau), dtype=np.float128) for action in actionsValue])
+            total = sum([np.exp(-1 / (actionsValue[action] * tau), dtype=np.float128) for action in actionsValue])
             probs = [(np.exp(-1 / (actionsValue[action] * tau), dtype=np.float128) / total) for action in actionsValue]
             print("probs: {}".format(probs))
         except ZeroDivisionError:
@@ -1050,7 +1085,8 @@ def get_action_softmax(Q, currentState, tau, actions={}, state_transitions={}):
             print("possible_actions: {}".format(possible_actions))
         return json.loads(chosenKey)
 
-def get_action_ucb(Q, currentState, c, direct = False, actions = {}, state_transitions = {}):
+
+def get_action_ucb(Q, currentState, c, direct=False, actions={}, state_transitions={}):
     """
     get the action based on the upper confident bound
     @param Q:
@@ -1073,7 +1109,6 @@ def get_action_ucb(Q, currentState, c, direct = False, actions = {}, state_trans
             values[action] = qCurrentState[action][1] + c * np.sqrt(np.log(iteratorStateVisits) /
                                                                     qCurrentState[action][0])
         return json.loads(max(values, key=values.get))
-
 
 
 def save_csv_file(logPath, loadLevel, fileName, reward, timepoint, splitUpLoadLevels, iterationsSplitUpflag, iteration):
@@ -1113,7 +1148,7 @@ def clearing_save_file(logPath, loadLevel, fileName, splitUpLoadLevels, iteratio
     @param iteration: number iteration
     """
     if splitUpLoadLevels:
-        loadLevelStr = '/'+str(loadLevel)
+        loadLevelStr = '/' + str(loadLevel)
         print("LoadLevelStr: {}".format(loadLevelStr))
     else:
         loadLevelStr = ''
@@ -1129,13 +1164,15 @@ def clearing_save_file(logPath, loadLevel, fileName, splitUpLoadLevels, iteratio
 
 
 ###################### Debugging fcuntions #############################
-def saveQ(Q, iteration = -1):
+def saveQ(Q, iteration=-1):
     if iteration > 0:
-        filePath =  '../logs/{}/Q_array.json'.format(iteration)
+        filePath = '../logs/{}/Q_array.json'.format(iteration)
     else:
         filePath = '../logs/Q_array.json'
     with open(filePath, 'w') as file:
         json.dump(Q, file)  # use `json.loads` to do the reverse
+
+
 def saveQBest(Q):
     with open('../Q_array_best.json', 'a') as file:
         json.dump(Q, file)  # use `json.loads` to do the reverse
