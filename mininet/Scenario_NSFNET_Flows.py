@@ -18,20 +18,18 @@ import requests
 import sys
 sys.path.append("...")
 sys.path.append("..")
+sys.path.append("../controller")
 sys.path.append(".")
-sys.path.append("./Controller")
+print(os.getcwd())
+print(sys.path.__str__())
 from config import Config
 
 
-#             s2
-#  h11   10ms/     \10ms    h41
-#     -- s1          s4 --
-#  h12    14ms\     /14ms   h42
-#             s3
+###################################################################
+############### Scenario - NSFNET    ##############################
+###################################################################
+# https://upload.wikimedia.org/wikipedia/commons/e/e5/NSFNET-backbone-T3.png
 
-###################################################################
-############### Scenario - 4 Hosts    #############################
-###################################################################
 
 def reset_load_level(loadLevel):
     requests.put('http://0.0.0.0:8080/simpleswitch/params/load_level', data=json.dumps({"load_level": loadLevel}))
@@ -88,9 +86,8 @@ def myNetwork():
 
     bw_max_dict = Config.bw_max_dict
 
-    # linkarray
     linkArray = []
-    splitUpLoadLevelsFlag = Config.splitUpLoadLevelsFlag
+    splitUpLoadLevelsFlag = Config.split_up_load_levels_flag
     logs = Config.log_path
     # importante! the load levels for measurements
     loadLevels = Config.load_levels
@@ -123,7 +120,6 @@ def myNetwork():
     # Palo Alto - College Park   bidrectional
     # Palo Alto - Cambridge   bidrectional
     # Palo Alto - Houston   bidrectional
-
 
     info('*** Add hosts\n')
     comm_sessions = 6

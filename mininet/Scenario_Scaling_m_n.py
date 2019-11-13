@@ -14,19 +14,22 @@ import requests
 import sys
 sys.path.append("...")
 sys.path.append("..")
+sys.path.append("../controller")
 sys.path.append(".")
-#sys.path.append("./Controller")
-from Controller.config import Config
+print(os.getcwd())
+print(sys.path.__str__())
+from config import Config
 
 
-#             s2
+#             s1
 #  h11   10ms/     \10ms    h41
-#     -- s1          s4 --
-#  h12    14ms\     /14ms   h42
-#             s3
-
+#     -- s_s          s_d --
+#  h1m    10ms\     /10ms   h4m
+#             sm
+# m switches -> m paths in between source and destination
+# m hosts -> m connections
 ###################################################################
-############### Scenario - 4 Hosts    #############################
+############### Scenario - Scaling    #############################
 ###################################################################
 
 def reset_load_level(loadLevel):
@@ -77,7 +80,7 @@ def four_switches_network():
 
     # linkarray
     linkArray = []
-    splitUpLoadLevelsFlag = Config.splitUpLoadLevelsFlag
+    splitUpLoadLevelsFlag = Config.split_up_load_levels_flag
     logs = Config.log_path
     # importante! the load levels for measurements
     loadLevels = Config.load_levels
@@ -147,17 +150,13 @@ def four_switches_network():
         #reset_iteration(0)
     # incrementing the load
     for iteration in range(iterations):
-        i = 0
         clearingSaveFileIterations(fileName, logs, iterations)
         # send load level
         print("(Re)starting iperf -- i: {}".format(iteration))
         for j in range(0, scaling_amount):
             start_new_thread(startIperf, (hostList_Start[j][0], hostList_End[j][0], 1.75+j*2.0, 5001, timeTotal))
-        i = i + 1
         time.sleep(timeTotal)
 
-        # waiting additional 2 sec to reset states
-        #time.sleep(2)
 
         if iteration_split_up_flag and iteration < iterations - 1:
             reset_iteration(iteration + 1)

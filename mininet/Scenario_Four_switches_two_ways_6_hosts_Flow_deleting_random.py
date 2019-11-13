@@ -16,19 +16,21 @@ import requests
 import sys
 sys.path.append("...")
 sys.path.append("..")
+sys.path.append("../controller")
 sys.path.append(".")
-sys.path.append("./Controller")
+print(os.getcwd())
+print(sys.path.__str__())
 from config import Config
 
 
 #             s2
 #  h11   10ms/     \10ms    h41
 #     -- s1          s4 --
-#  h12    14ms\     /14ms   h42
+#  h13    14ms\     /14ms   h43
 #             s3
 
 ###################################################################
-############### Scenario - 4 Hosts    #############################
+############### Scenario - 6 Hosts (deleting random)   ############
 ###################################################################
 
 def reset_load_level(loadLevel):
@@ -92,7 +94,7 @@ def four_switches_network():
 
     # linkarray
     linkArray = []
-    splitUpLoadLevelsFlag = Config.splitUpLoadLevelsFlag
+    splitUpLoadLevelsFlag = Config.split_up_load_levels_flag
     logs = Config.log_path
     # importante! the load levels for measurements
     loadLevels = Config.load_levels
@@ -163,18 +165,12 @@ def four_switches_network():
             clearingSaveFile(fileName, logs)
 
     time.sleep(15)
-    #if iteration_split_up_flag:
-    #    reset_iteration(0)
-    # incrementing the load
+
     clearingSaveFileIterations(fileName, logs, iterations)
     for iteration in range(iterations):
         i = 0
         flowArray = [[h11, h41, 2.75], [h12, h42, 1.75], [h13, h43, 1.75]]
-        #print(laterJoin)
-        #copiedFlowArray = copy.deepcopy(flowArray)
         laterLeave = random.choice(flowArray)
-        # flowArray.remove(laterJoin)
-        print(flowArray)
 
         for loadLevel in loadLevels:
             # iperf threads
@@ -195,12 +191,9 @@ def four_switches_network():
             i = i + 1
             time.sleep(timeTotal)
             # waiting additional 2 sec to reset states
-            #time.sleep(2)
 
         # last load level past
         if not splitUpLoadLevelsFlag:
-            #if iteration < iterations:
-                #reset_load_level(-1)
             write_in_File(fileName, logs, -1, iteration_split_up_flag, iteration)
         if iteration_split_up_flag and iteration < iterations - 1:
             reset_iteration(iteration + 1)

@@ -16,19 +16,21 @@ import requests
 import sys
 sys.path.append("...")
 sys.path.append("..")
+sys.path.append("../controller")
 sys.path.append(".")
-
-from Controller.config import Config
+print(os.getcwd())
+print(sys.path.__str__())
+from config import Config
 
 
 #             s2
 #  h11   10ms/     \10ms    h41
 #     -- s1          s4 --
-#  h12    14ms\     /14ms   h42
+#  h13    14ms\     /14ms   h43
 #             s3
 
 ###################################################################
-############### Scenario - 4 Hosts    #############################
+########## Scenario - 6 Hosts (flow adding, random)   #############
 ###################################################################
 
 def reset_load_level(loadLevel):
@@ -192,8 +194,6 @@ def four_switches_network():
 
         # last load level past
         if not splitUpLoadLevelsFlag:
-            #if iteration < iterations:
-                #reset_load_level(-1)
             write_in_File(fileName, logs, -1, iteration_split_up_flag, iteration)
         if iteration_split_up_flag and iteration < iterations - 1:
             reset_iteration(iteration + 1)

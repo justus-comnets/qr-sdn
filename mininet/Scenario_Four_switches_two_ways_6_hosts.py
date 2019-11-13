@@ -15,7 +15,7 @@ import sys
 import math
 sys.path.append("...")
 sys.path.append("..")
-sys.path.append("../Controller")
+sys.path.append("../controller")
 sys.path.append(".")
 print(os.getcwd())
 print(sys.path.__str__())
@@ -29,7 +29,7 @@ from config import Config
 #             s3
 
 ###################################################################
-############### Scenario - 4 Hosts    #############################
+############### Scenario - 6 Hosts    #############################
 ###################################################################
 
 def reset_load_level(loadLevel):
@@ -63,7 +63,7 @@ def clearingSaveFile(fileName, logs):
     with open('{}{}.csv'.format(dir, fileName), 'w') as file:
         file.write("# loadlevel, timestamp \n")
 
-def clearingSaveFileIterations(fileName, logs, iterations):
+def clearing_save_file_iterations(fileName, logs, iterations):
     # cleans it all up
     for iteration in range(iterations):
         dir = logs + '/' + str(iteration) + '/'
@@ -74,7 +74,7 @@ def clearingSaveFileIterations(fileName, logs, iterations):
         with open('{}{}.csv'.format(dir, fileName), 'w') as file:
             file.write("# loadlevel, timestamp \n")
 
-def minToSec(min):
+def min_to_sec(min):
     return min * 60
 
 def four_switches_network():
@@ -88,12 +88,12 @@ def four_switches_network():
 
     # linkarray
     linkArray = []
-    splitUpLoadLevelsFlag = Config.splitUpLoadLevelsFlag
+    split_up_load_levels_flag = Config.split_up_load_levels_flag
     logs = Config.log_path
     # importante! the load levels for measurements
     loadLevels = Config.load_levels
     print("LoadLevel: {}".format(loadLevels))
-    timeTotal = minToSec(Config.duration_iperf_per_load_level_minutes)
+    timeTotal = min_to_sec(Config.duration_iperf_per_load_level_minutes)
     controllerIP = '127.0.0.1'
     fileName = 'timestamp_changing_load_levels_mininet'
     info('*** Adding controller\n')
@@ -152,25 +152,23 @@ def four_switches_network():
         iteration_split_up_flag = False
 
     # erasing previous file
-    if not splitUpLoadLevelsFlag:
+    if not split_up_load_levels_flag:
         if iteration_split_up_flag:
-            clearingSaveFileIterations(fileName, logs, iterations)
+            clearing_save_file_iterations(fileName, logs, iterations)
         else:
             clearingSaveFile(fileName, logs)
 
     time.sleep(15)
-    #if iteration_split_up_flag:
-    #    reset_iteration(0)
     # incrementing the load
     for iteration in range(iterations):
         i = 0
-        clearingSaveFileIterations(fileName, logs, iterations)
+        clearing_save_file_iterations(fileName, logs, iterations)
         for loadLevel in loadLevels:
             # iperf threads
             # if the load levels are not split up -> write the load level change
-            if splitUpLoadLevelsFlag:
+            if split_up_load_levels_flag:
                 reset_load_level(loadLevel)
-            if not splitUpLoadLevelsFlag:
+            if not split_up_load_levels_flag:
                 write_in_File(fileName, logs, loadLevel, iteration_split_up_flag, iteration)
             # send load level
             print("(Re)starting iperf -- loadLevel:  {}".format(loadLevel))
@@ -184,9 +182,7 @@ def four_switches_network():
                 time.sleep(Config.waiting_time)
 
         # last load level past
-        if not splitUpLoadLevelsFlag:
-            #if iteration < iterations:
-                #reset_load_level(-1)
+        if not split_up_load_levels_flag:
             write_in_File(fileName, logs, -1, iteration_split_up_flag, iteration)
         if iteration_split_up_flag and iteration < iterations - 1:
             reset_iteration(iteration + 1)

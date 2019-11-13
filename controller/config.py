@@ -44,7 +44,7 @@ class Config(object):
     epsilon = 0.05
     temperature = 0.00005
     # for UCB
-    explorationDegree = 30
+    exploration_degree = 30
 
     # how long to wait until starting to gather new rewards
     delay_reward = 2
@@ -53,14 +53,14 @@ class Config(object):
     measurements_for_reward = 1
 
     # duration to stay in one load level by iperf
-    duration_iperf_per_load_level_minutes = 1440
+    duration_iperf_per_load_level_minutes = 20
 
     # load level
-    load_levels = [10]
+    load_levels = [10, 10]
     # load_levels = [10]
 
     # number of iterations per measurement
-    iterations = 1
+    iterations = 30
 
     # init_value for softmax
     softmax_init_value = - 140
@@ -70,19 +70,19 @@ class Config(object):
     scaling_amount = 4
 
     #
-    exploration_mode = ExplorationMode.UCB
+    exploration_mode = ExplorationMode.SOFTMAX
 
     # action mode
     action_mode = ActionMode.ONE_FLOW
 
     # if LoadLevel Test Case
-    resetQTestFlag = True
+    reset_Q_test_flag = True
 
     # splitting up - each load level different log file
-    splitUpLoadLevelsFlag = False
+    split_up_load_levels_flag = False
 
     # if merging QTables when new flow joins
-    mergingQTableFlag = False
+    merging_q_table_flag = False
 
     wait_between_load_lavel_change = False
     waiting_time = 0.5

@@ -15,19 +15,20 @@ import sys
 import math
 sys.path.append("...")
 sys.path.append("..")
+sys.path.append("../controller")
 sys.path.append(".")
-
-from Controller.config import Config
-
+print(os.getcwd())
+print(sys.path.__str__())
+from config import Config
 
 #             s2
 #  h11   10ms/     \10ms    h41
 #     -- s1          s4 --
-#  h12    14ms\     /14ms   h42
+#  h13    14ms\     /14ms   h43
 #             s3
 
 ###################################################################
-############### Scenario - 4 Hosts    #############################
+############### Scenario - 6 Hosts (Reversed)    ##################
 ###################################################################
 
 def reset_load_level(loadLevel):
@@ -81,12 +82,10 @@ def four_switches_network():
                   ipBase='10.0.0.0/8', link=TCLink)
 
     queue_lenght = Config.queue_lenght
-
     bw_max_dict = Config.bw_max_dict
-
     # linkarray
     linkArray = []
-    splitUpLoadLevelsFlag = Config.splitUpLoadLevelsFlag
+    splitUpLoadLevelsFlag = Config.split_up_load_levels_flag
     logs = Config.log_path
     # importante! the load levels for measurements
     loadLevels = Config.load_levels
@@ -178,12 +177,8 @@ def four_switches_network():
             i = i + 1
             time.sleep(timeTotal)
             # waiting additional 2 sec to reset states
-            #time.sleep(2)
-
         # last load level past
         if not splitUpLoadLevelsFlag:
-            #if iteration < iterations:
-                #reset_load_level(-1)
             write_in_File(fileName, logs, -1, iteration_split_up_flag, iteration)
         if iteration_split_up_flag and iteration < iterations - 1:
             reset_iteration(iteration + 1)
