@@ -4,7 +4,7 @@
 #### Folder description
 - `/controller`:
 Includes the controller implementation.
-Scripts can be started with: `ryu-manager remote_controller_RL.py`
+Scripts can be started with: `ryu-manager remote_controller.py`
     - `controller/config.py`:
         Config file containing all the parameters for the learning agent/controller (e.g. exploration strategy)
 
